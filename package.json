@@ -1,0 +1,27 @@
+{
+  "name": "github-cli",
+  "version": "0.0.1",
+  "description": "CLI for managing Github repositories",
+  "main": "src/index.js",
+  "repository": "https://github.com/HelloDHLyn/github-cli",
+  "author": "HelloDHLyn",
+  "license": "MIT",
+  "bin": {
+    "gh": "./src/index.js"
+  },
+  "scripts": {
+    "lint": "eslint ."
+  },
+  "dependencies": {
+    "ansi-colors": "^3.2.3",
+    "axios": "^0.18.0",
+    "commander": "^2.19.0",
+    "enquirer": "^2.3.0",
+    "git-url-parse": "^11.1.2"
+  },
+  "devDependencies": {
+    "eslint": "^5.14.1",
+    "eslint-config-airbnb": "^17.1.0",
+    "eslint-plugin-import": "^2.16.0"
+  }
+}
