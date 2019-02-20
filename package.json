@@ -17,7 +17,8 @@
     "axios": "^0.18.0",
     "commander": "^2.19.0",
     "enquirer": "^2.3.0",
-    "git-url-parse": "^11.1.2"
+    "git-url-parse": "^11.1.2",
+    "moment": "^2.24.0"
   },
   "devDependencies": {
     "eslint": "^5.14.1",

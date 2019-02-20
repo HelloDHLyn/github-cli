@@ -32,9 +32,10 @@ initialize();
 
 commander
   .command('issue')
-  .description('manage issues on repository')
+  .description('manage issues')
   .option('--all', 'include issues not assigend to me')
-  .action((_, options) => issueAction(currentRepo, options || {}));
+  .action((options) => issueAction(currentRepo, options));
+
 
 if (process.argv.length < 3) {
   commander.help();
