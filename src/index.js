@@ -5,7 +5,7 @@ const commander = require('commander');
 const Console = require('console');
 const GitUrlParse = require('git-url-parse');
 
-const issueAction = require('./actions/issue');
+const IssuePrompter = require('./prompters/issue');
 
 let currentRepo;
 
@@ -33,8 +33,11 @@ initialize();
 commander
   .command('issue')
   .description('manage issues')
-  .option('--all', 'include issues not assigend to me')
-  .action((options) => issueAction(currentRepo, options));
+  .option('-e, --everyone', 'include issues not assigend to me')
+  .action((options) => {
+    const p = new IssuePrompter(currentRepo, options);
+    p.list();
+  });
 
 
 if (process.argv.length < 3) {
