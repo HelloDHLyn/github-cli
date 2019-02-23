@@ -23,8 +23,9 @@ module.exports = class IssuePrompter extends Prompter {
    *
    * options:
    *   - everyone(boolean) : show issues assigned to everyone
+   *   - closed  (boolean) : show closed issues
    */
-  async list(cursor) {
+  async list() {
     // Get issues.
     let issues;
     let pageInfo;
@@ -32,7 +33,7 @@ module.exports = class IssuePrompter extends Prompter {
       const data = await super.query(`
         query {
           repository(owner: "${this.repo.owner}", name: "${this.repo.name}") {
-            issues(${cursor || 'first: 15'}, states: [OPEN], orderBy: {field: CREATED_AT, direction: DESC}) {
+            issues(${this.state.cursor || 'first: 15'}${this.options.closed ? '' : ', states: [OPEN]'}, orderBy: {field: CREATED_AT, direction: DESC}) {
               nodes { number title state updatedAt }
               pageInfo { hasPreviousPage hasNextPage startCursor endCursor }
             }
@@ -40,18 +41,20 @@ module.exports = class IssuePrompter extends Prompter {
         }
       `);
       issues = data.repository.issues.nodes;
-      ({ pageInfo } = data.search.pageInfo);
+      // eslint-disable-next-line prefer-destructuring
+      pageInfo = data.repository.issues.pageInfo;
     } else {
       const data = await super.query(`
         query {
-          search(${cursor || 'first: 15'}, query: "repo:${this.repo.owner}/${this.repo.name} assignee:${(await super.me()).login} is:issue is:open", type: ISSUE) {
+          search(${this.state.cursor || 'first: 15'}, query: "repo:${this.repo.owner}/${this.repo.name} assignee:${(await super.me()).login} is:issue ${this.options.closed ? '' : 'is:open'}", type: ISSUE) {
             edges { node { ... on Issue { number title state updatedAt } } }
             pageInfo { hasPreviousPage hasNextPage startCursor endCursor }
           }
         }
       `);
       issues = data.search.edges.map(e => e.node);
-      ({ pageInfo } = data.search.pageInfo);
+      // eslint-disable-next-line prefer-destructuring
+      pageInfo = data.search.pageInfo;
     }
     if (issues.length === 0) {
       super.print('No issue found.');
@@ -78,10 +81,12 @@ module.exports = class IssuePrompter extends Prompter {
     const answer = await prompt.run();
     switch (answer) {
       case 'next-page':
-        this.list(`after: "${pageInfo.endCursor}", first: 15`);
+        this.state.cursor = `after: "${pageInfo.endCursor}", first: 15`;
+        this.list();
         break;
       case 'previous-page':
-        this.list(`before: "${pageInfo.startCursor}", last: 15`);
+        this.state.cursor = `before: "${pageInfo.startCursor}", last: 15`;
+        this.list();
         break;
       default:
         this.state.issue.number = answer;
@@ -118,6 +123,7 @@ module.exports = class IssuePrompter extends Prompter {
       choices: [
         { value: 'see-comments', message: 'See comments' },
         { value: 'write-comment', message: 'Write a comment' },
+        { value: 'back-list', message: 'Go back to list' },
       ],
     });
 
@@ -127,6 +133,9 @@ module.exports = class IssuePrompter extends Prompter {
         break;
       case 'write-comment':
         this.writeComment();
+        break;
+      case 'back-list':
+        this.list();
         break;
       default:
         break;
@@ -165,12 +174,20 @@ module.exports = class IssuePrompter extends Prompter {
       name: 'Select comment action',
       choices: [
         { value: 'write-comment', message: 'Write a comment' },
+        { value: 'back-issue', message: 'Go back to issue' },
+        { value: 'back-list', message: 'Go back to list' },
       ],
     });
 
     switch (await prompt.run()) {
       case 'write-comment':
         this.writeComment();
+        break;
+      case 'back-issue':
+        this.get();
+        break;
+      case 'back-list':
+        this.list();
         break;
       default:
         break;

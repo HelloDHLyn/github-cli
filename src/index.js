@@ -33,6 +33,7 @@ initialize();
 commander
   .command('issue')
   .description('manage issues')
+  .option('-c, --closed', 'include closed issues')
   .option('-e, --everyone', 'include issues not assigend to me')
   .action((options) => {
     const p = new IssuePrompter(currentRepo, options);

@@ -6,11 +6,13 @@ const githubEndpoint = 'https://api.github.com/graphql';
 
 
 module.exports = class Prompter {
-  static print(text) {
+  // eslint-disable-next-line class-methods-use-this
+  print(text) {
     Console.log(text.replace(/^ */gm, '  '));
   }
 
-  static query(queryStr, ...args) {
+  // eslint-disable-next-line class-methods-use-this
+  query(queryStr, ...args) {
     const accessToken = process.env.GITHUB_ACCESS_TOKEN;
     if (!accessToken) {
       throw Error('Required to set `GITHUB_ACCESS_TOKEN` variable.');
